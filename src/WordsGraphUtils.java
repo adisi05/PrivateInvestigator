@@ -4,28 +4,27 @@ import java.util.List;
 
 public class WordsGraphUtils {
 
-    protected static final int SENTENCE_TOO_DIFFERENT = -1;
-    protected static final int NO_GAP_WORD = -1;
-
+    private static final int SENTENCE_TOO_DIFFERENT = -1;
+    private static final int NO_GAP_WORD = -1;
 
     public static void printSimilarSentences(WordsGraph wordsGraph){
-        for(Sentence s : wordsGraph.getAllSentences()){
+        wordsGraph.getAllSentences().forEach(s -> {
             HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndexIgnoreDuplicates = getSimilarSentencesGroupedByMissingWordIndex(wordsGraph, s, true);
             System.out.print(similarSentencesToString(s, similarSentencesByMissingWordIndexIgnoreDuplicates));
-        }
+        });
     }
 
     private static String similarSentencesToString(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex) {
         StringBuilder sb = new StringBuilder();
         if(similarSentencesByMissingWordIndex.size() > 0){
             for(int index : similarSentencesByMissingWordIndex.keySet()){
-                sb.append(similarSentencesByWordIndexToString(s, similarSentencesByMissingWordIndex, index));
+                sb.append(similarSentencesByMissingWordIndexToString(s, similarSentencesByMissingWordIndex, index));
             }
         }
         return sb.toString();
     }
 
-    private static String similarSentencesByWordIndexToString(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex, int index) {
+    private static String similarSentencesByMissingWordIndexToString(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex, int index) {
         StringBuilder sb = new StringBuilder();
         StringBuilder changinWordSB;
         if(index != NO_GAP_WORD) {
