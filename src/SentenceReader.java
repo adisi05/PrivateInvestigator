@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SentenceReader{
+    // TODO refactor date
     final protected String DATE_TIME = "(\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2})";
     final protected int DATE_TIME_GROUP = 1;
     final protected String WORD = "(\\S+)";

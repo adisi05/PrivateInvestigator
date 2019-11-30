@@ -5,13 +5,16 @@ import java.util.*;
 
 public class PrivateInvestigator {
 
+    protected static final int SENTENCE_TOO_DIFFERENT = -1;
+    protected static final int NO_GAP_WORD = -1;
+
     public static void main(String[] args) {
         //TODO get address from args?
-        List<String> lines = readFile("C:\\Users\\Adi\\Desktop\\test01.txt");
+        List<String> lines = readFile("C:\\Users\\Adi\\Desktop\\test02.txt");
         SentenceReader reader = new SentenceReader();
         List<Sentence> sentences = reader.convert(lines);//TODO consider using array or vector
         WordsGraph wordsGraph = new WordsGraph();
-        sentences.forEach(s-> { wordsGraph.addSentence(s); });
+        sentences.forEach(s->wordsGraph.addSentence(s));
         printGroups(sentences, wordsGraph);
     }
 
@@ -36,71 +39,81 @@ public class PrivateInvestigator {
     private static void printGroups(List<Sentence> sentences, WordsGraph wordsGraph){
         for(Sentence s : sentences){
             HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndexIgnoreDuplicates = getSimilarSentencesByMissingWordIndex(wordsGraph, s, true);
-            System.out.println(printAllGroupsOfSentence(s, similarSentencesByMissingWordIndexIgnoreDuplicates));
+            System.out.print(allGroupsOfSentenceToString(s, similarSentencesByMissingWordIndexIgnoreDuplicates));
         }
     }
 
-    private static String printAllGroupsOfSentence(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex) {
+    private static String allGroupsOfSentenceToString(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex) {
         StringBuilder sb = new StringBuilder();
         if(similarSentencesByMissingWordIndex.size() > 0){
             for(int index : similarSentencesByMissingWordIndex.keySet()){
-                sb.append(printGroupOfSentenceByIndex(s, similarSentencesByMissingWordIndex, index));
+                sb.append(groupOfSentenceByIndexToString(s, similarSentencesByMissingWordIndex, index));
             }
         }
         return sb.toString();
     }
 
-    private static String printGroupOfSentenceByIndex(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex, int index) {
+    private static String groupOfSentenceByIndexToString(Sentence s, HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex, int index) {
         StringBuilder sb = new StringBuilder();
-        StringBuilder changinWordSB = new StringBuilder("The changing word was:");
+        StringBuilder changinWordSB;
+        if(index != NO_GAP_WORD) {
+            changinWordSB =  new StringBuilder("The changing word was:");
+            changinWordSB.append(" ").append(s.getWords().get(index)).append(",");
+        } else {
+            changinWordSB = new StringBuilder("Basically the same sentence");
+        }
         sb.append(s.toString());
-        changinWordSB.append(" ").append(s.getWords().get(index)).append(",");
         for(Sentence s2 : similarSentencesByMissingWordIndex.get(index)){
             sb.append(s2.toString());
-            changinWordSB.append(" ").append(s2.getWords().get(index)).append(",");
+            if(index != NO_GAP_WORD) {
+                changinWordSB.append(" ").append(s2.getWords().get(index)).append(",");
+            }
         }
         changinWordSB.setLength(changinWordSB.length() - 1);//remove last comma
-        sb.append(changinWordSB).append("\n");
+        if (index == NO_GAP_WORD){
+            changinWordSB = new StringBuilder("Basically the same sentence");
+        }
+        sb.append(changinWordSB).append("\n\n");
         return sb.toString();
     }
 
-    private static HashMap<Integer, List<Sentence>> getSimilarSentencesByMissingWordIndex(WordsGraph wordsGraph, Sentence s1, boolean ignoreDuplicates) {
-        HashMap<Sentence, Pair<Integer,Integer>> sentencesWithMissingWord = new HashMap<>();
-        Vector<String> words = s1.getWords();
+    private static HashMap<Integer, List<Sentence>> getSimilarSentencesByMissingWordIndex(WordsGraph wordsGraph, Sentence s, boolean ignoreDuplicates) {
+        HashMap<Sentence, Pair<Integer,Integer>> sentencesWithLastContainedWordAndLastGap = new HashMap<>();
+        Vector<String> words = s.getWords();
         for(int i = 0; i < words.size(); i++){
             List<Sentence> sentencesWithSameWordSamePos = wordsGraph.getSentencesByWordAndPosition(words.get(i), i);
             for (Sentence s2 : sentencesWithSameWordSamePos){
-                if(ignoreDuplicates && s2.getDateTime().compareTo(s1.getDateTime()) <= 0){
+                if(ignoreDuplicates && s2.getDateTime().compareTo(s.getDateTime()) <= 0){
                     continue; //we don't want duplicates, it's1 a symmetrical relation
                 }
-                int lastContainedWordIndex = -1;
-                int gapIndex = -1;
-                if (sentencesWithMissingWord.containsKey(s2)){
-                    lastContainedWordIndex = sentencesWithMissingWord.get(s2).getElement0();
-                    gapIndex = sentencesWithMissingWord.get(s2).getElement1();
-                    sentencesWithMissingWord.remove(s2);
+                int lastContainedWordIndex = SENTENCE_TOO_DIFFERENT;
+                int gapIndex = NO_GAP_WORD;
+                if (sentencesWithLastContainedWordAndLastGap.containsKey(s2)){
+                    lastContainedWordIndex = sentencesWithLastContainedWordAndLastGap.get(s2).getElement0();
+                    gapIndex = sentencesWithLastContainedWordAndLastGap.get(s2).getElement1();
+                    sentencesWithLastContainedWordAndLastGap.remove(s2);
                 }
-                if (lastContainedWordIndex == i - 1){
+                if (lastContainedWordIndex == i - 1){// since SENTENCE_TOO_DIFFERENT=-1 this condition is always true when i is 0
                     lastContainedWordIndex = i;
-                } else if (lastContainedWordIndex == i - 2){
-                    if (gapIndex == -1) {//didn't have gap before, this is the first gap
+                } else if (lastContainedWordIndex == i - 2){// since SENTENCE_TOO_DIFFERENT=-1 this condition is always true when i is 1
+                    if (gapIndex == NO_GAP_WORD) {//didn't have gap before, this is the first gap
                         gapIndex = i - 1;
                         lastContainedWordIndex = i;
                     } else {// already had gap before
-                        lastContainedWordIndex = -1;// don't add again
+                        lastContainedWordIndex = SENTENCE_TOO_DIFFERENT;// don't add again
                     }
                 } else {
-                    lastContainedWordIndex = -1;
+                    lastContainedWordIndex = SENTENCE_TOO_DIFFERENT;
                 }
                 if(lastContainedWordIndex == i){
-                    sentencesWithMissingWord.put(s2, new Pair<Integer,Integer>(lastContainedWordIndex,gapIndex));
+                    sentencesWithLastContainedWordAndLastGap.put(s2, new Pair<Integer,Integer>(lastContainedWordIndex,gapIndex));
                 }
             }
         }
-        // remove s2 sentences that didn't end after the same word amount as s1, and had only one changed word
+        // exclude s2 sentences that didn't end after the same words amount as s
         HashMap<Integer, List<Sentence>> similarSentencesByMissingWordIndex = new HashMap<>();
-        for(Sentence s2 : sentencesWithMissingWord.keySet()){
-            Pair<Integer,Integer> lastContainedWordAndGap = sentencesWithMissingWord.get(s2);
+        for(Sentence s2 : sentencesWithLastContainedWordAndLastGap.keySet()){
+            Pair<Integer,Integer> lastContainedWordAndGap = sentencesWithLastContainedWordAndLastGap.get(s2);
             int lastContainedWord = lastContainedWordAndGap.getElement0();
             int missingWordIndex = lastContainedWordAndGap.getElement1();
             if(lastContainedWord == words.size() - 1){
