@@ -20,7 +20,7 @@ public class SentenceReader {
                 String dateTimeString = m.group(DATE_TIME_GROUP);
                 Date dateTime = new SimpleDateFormat(Sentence.DATE_TIME_PATTERN).parse(dateTimeString);
                 String words = m.group(WORDS_GROUP);
-                List<String> wordsSplitted = Arrays.asList(words.split(" "));
+                ArrayList<String> wordsSplitted = new ArrayList<>(Arrays.asList(words.split(" ")));
                 wordsSplitted.add(Sentence.END_OF_SENTENCE);
                 Sentence sentence = new Sentence(dateTime, wordsSplitted);
                 sentences.add(sentence);
