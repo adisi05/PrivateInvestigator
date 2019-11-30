@@ -1,0 +1,9 @@
+01-01-2012 19:45:00 Naomi is talking to George
+01-01-2012 20:12:39 George is talking to Naomi
+01-01-2012 20:30:00 Naomi is talking to George talking to Naomi
+02-01-2012 09:13:15 Naomi is walking really fast
+02-01-2012 10:14:00 Naomi is walking really really fast
+03-01-2012 10:14:00 Naomi is walking really really really fast
+04-01-2012 20:23:00 Naomi is talking to George
+05-01-2012 02:25:00 George is dailing someone
+05-01-2012 02:27:00 George is dailing 911

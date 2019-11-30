@@ -1,35 +1,44 @@
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Vector;
 
-public class Sentence {
-    public static final String ENF_OF_SENTENCE = "\n";//TODO if I use spring, am I cool with static?
-    private Long id;//TODO needed?
-    private String dateTime;
-    private Vector<String> words;//TODO consider using list or array
+public class Sentence implements Comparable<Sentence>{
+    public static final String END_OF_SENTENCE = "\n";
+    public static final String DATE_TIME_PATTERN = "dd-mm-yyyy hh:mm:ss";
+    private Date dateTime;
+    private ArrayList<String> words;
 
-    public String getDateTime() {
+    public Sentence(Date dateTime, List<String> words) {
+        this.dateTime = dateTime;
+        this.words = new ArrayList<>(words);
+        if (!words.get(words.size() - 1).equals(END_OF_SENTENCE)){
+            words.add(END_OF_SENTENCE);
+        }
+    }
+
+
+    public Date getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(String dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public Vector<String> getWords() {
+    public ArrayList<String> getWords() {
         return words;
-    }
-
-    public void setWords(Vector<String> words) {
-        this.words = words;
-        if (!words.get(words.size() - 1).equals(ENF_OF_SENTENCE)){
-            words.add(ENF_OF_SENTENCE);
-        }
     }
 
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        sb.append(getDateTime());
+        DateFormat dateFormat = new SimpleDateFormat(DATE_TIME_PATTERN);
+        String strDate = dateFormat.format(getDateTime());
+        sb.append(strDate);
         words.stream().forEach(w->sb.append(" ").append(w));
         return sb.toString();
+    }
+
+    @Override
+    public int compareTo(Sentence s2) {
+        int timeDiff = this.getDateTime().compareTo(s2.getDateTime());
+        return timeDiff != 0 ? timeDiff : this.toString().compareTo(s2.toString());
     }
 }
