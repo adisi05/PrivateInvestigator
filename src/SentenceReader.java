@@ -23,6 +23,7 @@ public class SentenceReader{
                 sentence.setDateTime(m.group(DATE_TIME_GROUP));
                 String words = m.group(WORDS_GROUP);
                 Vector<String> wordsSplitted = new Vector<String>(Arrays.asList(words.split(" ")));
+                wordsSplitted.add(Sentence.ENF_OF_SENTENCE);
                 sentence.setWords(wordsSplitted);
                 sentences.add(sentence);
             }
