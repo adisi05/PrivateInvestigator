@@ -67,8 +67,7 @@ public class PrivateInvestigator {
                     similarSentences.add(s2);
                 }
             }
-            //TODO maybe here sort by word?
-
+            //TODO maybe here sort by word? instead of sentences with score, use sentences with score and gap (value is Pair), and when aggragating similar sentences make it also a map by gap index
 
             if(similarSentences.size() > 0){
                 sb.append(s1.toString()).append("\n");
