@@ -7,7 +7,7 @@ public class PrivateInvestigator {
 
     // put in program arguments one of the test files, for example: "test_files/test01.txt"
     public static void main(String[] args) throws Exception {
-        List<String> lines = readFile(args[0]);
+        List<String> lines = readFile("test_files/test04.txt");
         List<Sentence> sentences = SentenceReader.convert(lines);
         WordsGraph wordsGraph = new WordsGraph();
         sentences.forEach(wordsGraph::addSentence);
